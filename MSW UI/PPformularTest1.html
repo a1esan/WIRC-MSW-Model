@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power Plant Performance</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary-blue: #003366;
+    --dark-footer: #1a2533;
+    --accent-yellow: #f5c242;
+    --text-grey: #666;
+    --border-dashed: rgba(255, 255, 255, 0.3);
+    /* ตัวแปรส่วนคำนวณ */
+    --light-yellow: #fceeb5; 
+    --active-orange: #fdd835;
+    --gray-bg: #f9f9f9;
+  }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* --- Header --- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #eee;
+  }
+  .header-left { display: flex; align-items: center; gap: 15px; }
+  .logos { display: flex; gap: 10px; align-items: center; }
+  .logos img { height: 50px; width: auto; }
+  .brand-text { border-left: 1px solid #ddd; padding-left: 15px; }
+  .brand-text h1 { font-size: 1.2rem; font-weight: 700; color: var(--primary-blue); margin: 0; }
+  .brand-text p { font-size: 0.8rem; color: var(--text-grey); margin: 0; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .nav-link { text-decoration: none; color: var(--text-grey); font-size: 0.95rem; }
+  .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
+  .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
+  
+  /* --- App Container --- */
+  .app-container {
+    display: flex;
+    max-width: 1300px;
+    width: 95%;
+    margin: 40px auto 60px auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    overflow: hidden;
+    min-height: 600px; 
+  }
+
+  /* --- Sidebar --- */
+  .sidebar {
+    width: 260px;
+    background-color: var(--light-yellow);
+    padding: 20px;
+    border-right: 1px solid #eee;
+    flex-shrink: 0;
+  }
+
+  .nav-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background: rgba(255,255,255,0.6);
+    border: 2px solid white;
+    border-radius: 12px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #555;
+    font-weight: 600;
+    box-sizing: border-box;
+  }
+
+  .nav-btn:hover { background: white; }
+  .nav-btn.active {
+    background: white;
+    color: var(--primary-blue);
+    border-color: var(--active-orange);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  /* --- Content Area --- */
+  .content-area {
+    flex: 1;
+    padding: 40px;
+    background-color: white;
+  }
+
+  .page-section {
+    display: none;
+    animation: fadeIn 0.3s;
+  }
+  .page-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  h3.section-title {
+    color: var(--primary-blue);
+    border-bottom: 3px solid var(--light-yellow);
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 1.5rem;
+  }
+
+  /* --- Custom Table Styles --- */
+  .custom-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: 'Sarabun', sans-serif;
+    margin-bottom: 20px;
+  }
+
+  .ct-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.2fr 1.2fr;
+    gap: 8px;
+  }
+
+  .ct-header, .ct-section {
+    background-color: #d9d9d9;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .ct-header { display: flex; align-items: center; justify-content: center; }
+
+  .ct-blue {
+    background-color: #a9d1e5;
+    padding: 10px;
+    border-radius: 8px;
+    color: #000;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .ct-yellow {
+    background-color: #ffe699;
+    padding: 10px;
+    border-radius: 8px;
+    color: #000;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .left-align { justify-content: flex-start; padding-left: 20px; }
+
+  /* ช่องกรอกข้อมูล */
+  .ct-input-box {
+    background-color: #f2f2f2;
+    border-radius: 8px;
+    border: none !important;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    min-height: 40px;
+  }
+  .ct-input-box:focus-within { background-color: #e6e6e6; }
+
+  .ct-input {
+    width: 100%; height: 100%;
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
+    text-align: center;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1rem;
+    color: #333;
+    padding: 0; margin: 0;
+  }
+
+  /* --- General Input & Buttons --- */
+  .input-group {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px; padding: 15px;
+    background: var(--gray-bg);
+    border-radius: 8px; border: 1px solid #eee;
+  }
+
+  .btn-calc {
+    width: 100%; padding: 12px;
+    background-color: var(--primary-blue);
+    color: white;
+    border: none; border-radius: 8px;
+    font-size: 1.1rem; cursor: pointer;
+    margin-top: 20px; transition: background 0.2s;
+    font-family: 'Sarabun', sans-serif;
+  }
+  .btn-calc:hover { background-color: #002244; }
+
+  .result-box {
+    margin-top: 20px; text-align: center;
+    font-size: 1.2rem; font-weight: bold;
+    color: var(--primary-blue);
+    padding: 15px; background-color: #f0f7ff;
+    border-radius: 8px;
+  }
+
+/* สไตล์ของตัวเลขที่จะไปโผล่ในกล่อง */
+.overlay-number {
+  position: absolute;
+  /* background-color: rgba(255, 0, 0, 0.2);  <-- ถ้าจะเช็คตำแหน่ง ให้เอาบรรทัดนี้ออกจะเห็นสีแดงจางๆ */
+  color: #003366;      /* สีตัวเลข (น้ำเงินเข้ม) */
+  font-weight: bold;
+  font-size: 1.2rem;   /* ขนาดตัวเลข */
+  width: 15%;          /* ความกว้างพื้นที่ตัวเลข (กะประมาณเอา) */
+  text-align: center;  /* จัดกึ่งกลาง */
+}
+
+/* ปรับตำแหน่งกล่องบน (Secondary Air) */
+.pos-top {
+  top: 32%;   /* ห่างจากขอบบน 38% (ลองปรับเลขนี้ถ้าไม่ตรง) */
+  right: 10%; /* ห่างจากขอบขวา 18% */
+}
+
+/* ปรับตำแหน่งกล่องล่าง (Primary Air) */
+.pos-bottom {
+  bottom: 26%; /* ห่างจากขอบล่าง 23% (ลองปรับเลขนี้ถ้าไม่ตรง) */
+  right: 8%;  /* ห่างจากขอบขวา 18% */
+}
+
+  /* --- Summary Page --- */
+  .sum-list { list-style: none; padding: 0; }
+  .sum-item {
+    display: flex; justify-content: space-between; padding: 12px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .total-box {
+    margin-top: 20px; padding: 20px;
+    background-color: var(--light-yellow);
+    border: 2px solid var(--active-orange);
+    border-radius: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 1.4rem; font-weight: bold; color: var(--primary-blue);
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 800px) {
+    .app-container { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; display: flex; overflow-x: auto; padding: 10px; gap: 10px; box-sizing: border-box; }
+    .nav-btn { width: auto; white-space: nowrap; margin-bottom: 0; flex-shrink: 0; }
+  }
+
+  /* --- Side Menu Mobile --- */
+  .menu-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); display: none; z-index: 999;
+  }
+  .menu-overlay.active { display: block; }
+
+  .side-menu {
+    position: fixed; top: 0; right: -400px;
+    width: 350px; height: 100%;
+    background-color: #1a2533; z-index: 1000;
+    transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    border-radius: 20px 0 0 20px; color: white; overflow-y: auto;
+  }
+  .side-menu.active { right: 0; }
+  .menu-content { padding: 40px 25px; text-align: center; }
+  .close-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; cursor: pointer; color: white; }
+  .menu-links { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+  .menu-links a {
+    display: block; padding: 14px; color: white; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; transition: 0.3s;
+    font-size: 0.95rem; text-align: left;
+  }
+  .menu-links a:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-yellow); border-color: white; }
+
+  /* --- ส่วน CSS ที่เพิ่มใหม่สำหรับ Diagram --- */
+.result-section-hidden {
+  display: none; /* ซ่อนไว้ก่อน จะโชว์เมื่อกดคำนวณ */
+  margin-top: 30px;
+  animation: fadeIn 0.5s;
+}
+
+.result-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.result-table-col {
+  flex: 1;
+  min-width: 300px;
+}
+
+.result-image-col {
+  flex: 1;
+  min-width: 300px;
+  position: relative; /* เพื่อให้วางกล่องตัวเลขทับได้ */
+  display: flex;
+  justify-content: center;
+}
+
+.diagram-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px; /* ปรับขนาดรูปสูงสุดตามต้องการ */
+}
+
+.diagram-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* กล่องตัวเลขที่ลอยอยู่บนรูป */
+.overlay-box {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #333;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: var(--primary-blue);
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  font-size: 0.9rem;
+}
+
+/* ตำแหน่งกล่อง (ต้องปรับ % ตามรูปจริงของคุณ) */
+/* กล่อง Secondary Air (ด้านบน) */
+.pos-sec {
+  top: 35%;  /* ปรับตำแหน่งแนวตั้ง */
+  right: 5%; /* ปรับตำแหน่งแนวนอน */
+}
+
+/* กล่อง Primary Air (ด้านล่าง) */
+.pos-pri {
+  bottom: 20%; /* ปรับตำแหน่งแนวตั้ง */
+  right: 5%;   /* ปรับตำแหน่งแนวนอน */
+}
+
+  /* --- Footer --- */
+  main { flex: 1; padding: 20px; }
+  
+  footer {
+    background-color: #161F2B;
+    color: #ffffff;
+    font-family: 'Sarabun', sans-serif;
+    margin-top: auto;
+  }
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+  }
+  .f-col-info { flex: 2; padding-right: 40px; }
+  .f-col-info h3 { margin: 5px 0; font-size: 1.1rem; }
+  .f-col-info p { color: #ccc; font-size: 0.9rem; margin-top: 10px; line-height: 1.6; }
+  .f-col-menu {
+    flex: 1;
+    border-left: 1px dashed rgba(255,255,255,0.3);
+    padding-left: 40px;
+  }
+  .f-col-contact {
+    flex: 1.5;
+    border-left: 1px dashed rgba(255,255,255,0.3);
+    padding-left: 40px;
+  }
+  .f-title { font-weight: bold; margin-bottom: 20px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+  .f-links { list-style: none; padding: 0; }
+  .f-links li { margin-bottom: 12px; }
+  .f-links a { color: #dddddd; text-decoration: none; transition: 0.3s; }
+  .f-links a:hover { color: #ffca28; }
+  .contact-detail p { margin-bottom: 8px; color: #ccc; font-size: 0.9rem; }
+  .copyright {
+    background-color: #0f151d;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.8rem;
+    color: #666;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+</style>
+<!-- จบ CSS -->
+</head>
+<body>
+
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideMenu" class="side-menu">
+      <div class="menu-content">
+          <div class="close-btn" onclick="toggleMenu()">×</div>
+          <div class="menu-header">
+              <h2>WIRC-MSW Model</h2>
+              <p>Mathematical Model for MSW in Developing Countries</p>
+          </div>
+          <nav class="menu-links">
+              <a href="index.html" onclick="toggleMenu()">Home</a>
+              <a href="HHV_test.html" onclick="toggleMenu()">HHV Calculator</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Power Plant Performance</a>
+              <a href="manual.html" onclick="toggleMenu()">User Manual</a>
+              <a href="#contact-section" onclick="toggleMenu()">Contact Us</a>
+          </nav>
+      </div>
+  </div>
+
+  <header>
+    <div class="header-left">
+      <div class="logos">
+        <img src="image/KMUTNB LOGO.png" style="height: 50px;">
+        <img src="image/MAE LOGO.png" style="height: 50px;">
+        <img src="image/WRIC LOGO.png" style="height: 50px;">
+      </div>
+
+      <div class="brand-text">
+        <h1>WIRC-MSW Model</h1>
+        <p>Mathematical Model for MSW in Developing Countries</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a href="manual.html" class="nav-link">User Manual</a>
+      <div class="lang-switch">TH | EN</div>
+      <div class="hamburger" onclick="toggleMenu()">☰</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="app-container">
+      <nav class="sidebar">
+        <div class="nav-btn active" onclick="goToPage(1)">1. Combustion Air Quantity</div>
+        <div class="nav-btn" onclick="goToPage(2)">2. Exhaust Gas Generation</div>
+        <div class="nav-btn" onclick="goToPage(3)">3. Combustion Temperature</div>
+        <div class="nav-btn" onclick="goToPage(4)">4. Steam Generation Rate</div>
+        <div class="nav-btn" onclick="goToPage(5)">5. Turbine And Generator</div>
+        <div class="nav-btn" onclick="goToPage('sum')">6. Overall Summary</div>
+      </nav>
+
+      <div class="content-area">
+
+  <!-- เริ่มส่วนที่1 Combustion Air Quantity-->
+
+  <style>
+    #output-section {
+    display: none; /* บังคับให้ซ่อนไว้ก่อนเสมอ */
+}
+  /* 1. คุมสัดส่วนคอลัมน์ให้ตรงกันเป๊ะทั้งตารางฟ้าและเหลือง */
+  .grid-table {
+    display: grid;
+    grid-template-columns: 2.0fr 1fr 2.0fr 1fr; /* สัดส่วน: รายการ | สัญลักษณ์ | ค่า | หน่วย */
+    gap: 12px 10px; /* ระยะห่างระหว่างแถว 12px และคอลัมน์ 10px */
+    margin-bottom: 20px;
+  }
+
+  /* 2. สไตล์ของแต่ละช่อง (Cell) */
+  .grid-cell {
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    min-height: 30px;
+  }
+
+  /* สีพื้นหลังตามสถานะ */
+  .bg-header { background-color: #f1f3f5; font-weight: bold; color: #555; }
+  .bg-blue { background-color: #a9d1e5; color: #333; }
+  .bg-pink { background-color: #ffccbc; color: #333; }
+  .bg-yellow { background-color: #ffe699; color: #333; }
+  .bg-grey-section { 
+    background-color: #e9ecef; 
+    grid-column: span 4; 
+    font-weight: bold; 
+    justify-content: center; 
+  }
+  
+  /* ช่อง Input และช่องแสดงผล */
+  .bg-white-box { 
+    background-color: #f8f9fa; 
+    border: 1px solid #dee2e6; 
+    padding: 0; 
+    overflow: hidden;
+  }
+
+  .inner-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-weight: bold;
+    outline: none;
+  }
+
+  .left-align { justify-content: flex-start; }
+
+  /* 3. แถบสถานะหลังกดคำนวณ */
+  #status-display {
+    text-align: center;
+    background-color: #f0faff;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 1px solid #d0e8ff;
+  }
+
+  /* 4. ตัวเลขบนรูปภาพ */
+  .img-overlay-val {
+    background-color: white;
+    border: 2px solid #003366;
+    padding: 2px 8px;
+    min-width: 60px;
+    text-align: center;
+    font-weight: bold;
+    color: #003366;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.img-overlay-unit {
+    background-color: #f1f3f5;
+    border: 1px solid #ccc;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
+
+  .img-overlay-val2 {
+    background-color: white;
+    border: 1px solid #003366;
+    padding: 1px 4px;
+    min-width: 20px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    color: #003366;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.img-overlay-unit2 {
+    background-color: #f1f3f5;
+    border: 1px solid #ccc;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #666;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
+</style>
+
+<div id="page-1" class="page-section active">
+  <h3 class="section-title">Combustion Air Quantity</h3>
+
+  <div class="grid-table">
+    <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
+   
+    <div class="grid-cell bg-header">Parameter</div>
+    <div class="grid-cell bg-header">Symbol</div>
+    <div class="grid-cell bg-header">Value</div>
+    <div class="grid-cell bg-header">Unit</div>
+
+    <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
+    <div class="grid-cell bg-blue">W</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_waste" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">ton/day</div>
+    
+    <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
+    <div class="grid-cell bg-blue">HHV</div>
+    <div class="grid-cell bg-white-box">
+      <input type="number" id="in_hhv" class="inner-input" oninput="validateLive()" placeholder="Enter HHV (or 0 if use LHV)">
+    </div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
+    <div class="grid-cell bg-pink">LHV</div>
+    <div class="grid-cell bg-white-box">
+      <input type="number" id="in_lhv" class="inner-input" oninput="validateLive()" placeholder="Enter LHV (or 0 if use HHV)">
+    </div>
+    <div class="grid-cell bg-pink">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Moisture</div>
+    <div class="grid-cell bg-blue">M</div>
+    <div class="grid-cell bg-white-box">
+      <input type="number" id="in_moisture" class="inner-input" oninput="validateLive()" placeholder="0-100%">
+    </div>
+    <div class="grid-cell bg-blue">%wt</div>
+
+    <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
+    <div class="grid-cell bg-blue">E</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air" class="inner-input" oninput="validateLive()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-blue"></div>
+
+    <div class="grid-cell bg-blue left-align">Primary Air</div>
+    <div class="grid-cell bg-blue">PA</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_pa_ratio" class="inner-input" oninput="validateLive()" placeholder="PA %"></div>
+    <div class="grid-cell bg-blue">%</div>
+
+    <div class="grid-cell bg-blue left-align">Secondary Air</div>
+    <div class="grid-cell bg-blue">SA</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_sa_ratio" class="inner-input" oninput="validateLive()" placeholder="SA %"></div>
+    <div class="grid-cell bg-blue">%</div>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <button type="button" class="btn-calc" onclick="runCombustionCalc()" style="width: 100%; max-width: 500px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Combustion Air Quantity</button>
+  </div>
+
+  <div id="output-section" style="display: none !important;">
+    <div id="status-display" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
+      <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
+    </div>
+
+    <div class="grid-table">
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Mass of air required for combustion</div>
+      <div class="grid-cell bg-yellow left-align">Total Air required</div>
+      <div class="grid-cell bg-yellow">ṁ<sub>air</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_ma" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Primary Air Mass</div>
+      <div class="grid-cell bg-yellow">ṁ<sub>1</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_map" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Secondary Air Mass</div>
+      <div class="grid-cell bg-yellow">ṁ<sub>2</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_mas" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">kg<sub>air</sub>/hr</div>
+
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Volumetric Flow Rate of Combustion Air</div>
+      <div class="grid-cell bg-yellow left-align">Required Combustion Air Flow</div>
+      <div class="grid-cell bg-yellow">V̇<sub>air</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_va" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Primary Air Flow Rate</div>
+      <div class="grid-cell bg-yellow">V̇<sub>1</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_vap" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
+
+      <div class="grid-cell bg-yellow left-align">Secondary Air Flow Rate</div>
+      <div class="grid-cell bg-yellow">V̇<sub>2</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_vas" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
+    </div>
+
+    <div style="position: relative; width: 100%; display: flex; justify-content: center;">
+  <div style="position: relative; display: inline-block;">
+      <img src="image/Airflow (2).png" style="width: 100%; max-width: 550px; height: auto; display: block; border-radius: 8px;">
+      
+      <div style="position: absolute; top: 32.5%; left: 83%; display: flex; gap: 4px;">
+          <div id="box-val-sec" class="img-overlay-val">0.00</div>
+          <div class="img-overlay-unit">Nm³/hr</div>
+      </div>
+
+      <div style="position: absolute; top: 68%; left: 87%; display: flex; gap: 4px;">
+          <div id="box-val-pri" class="img-overlay-val">0.00</div>
+          <div class="img-overlay-unit">Nm³/hr</div>
+      </div>
+    </div>
+    </div>
+
+    <div style="text-align: right; margin-top: 20px;">
+      <button type="button" onclick="showPage(2)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+    </div>
+  
+  </div>
+</div>
+
+<script>
+/*** ฟังก์ชันเช็คความถูกต้องของข้อมูลและเปลี่ยนสีตัวเลขทันที (Live Validation)*/
+function validateLive() {
+    const mInput = document.getElementById('in_moisture');
+    const eInput = document.getElementById('in_excess_air');
+    const paInput = document.getElementById('in_pa_ratio');
+    const saInput = document.getElementById('in_sa_ratio');
+    const hhvInput = document.getElementById('in_hhv');
+    const lhvInput = document.getElementById('in_lhv');
+
+    const mVal = parseFloat(mInput.value) || 0;
+    const eVal = parseFloat(eInput.value) || 0;
+    const paVal = parseFloat(paInput.value) || 0;
+    const saVal = parseFloat(saInput.value) || 0;
+    const hhvVal = parseFloat(hhvInput.value) || 0;
+    const lhvVal = parseFloat(lhvInput.value) || 0;
+
+    // 1. เช็ค Moisture (0-100)
+    mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
+
+    // 2. เช็ค Excess Air (ไม่เกิน 1.0)
+    eInput.style.color = (eVal > 1) ? "red" : (eVal > 0 ? "green" : "");
+
+    // 3. เช็ค PA + SA (ต้องรวมได้ 100)
+    const isSumOk = (paVal + saVal === 100);
+    paInput.style.color = isSumOk ? "green" : "red";
+    saInput.style.color = isSumOk ? "green" : "red";
+
+    // --- ส่วนที่เพิ่มใหม่: แยกสี HHV และ LHV ---
+    // ถ้าค่าเป็น 0 ให้เป็นสีเทา (#999) ถ้ามีค่าให้เป็นสีน้ำเงินเข้ม (#003366)
+    hhvInput.style.color = (hhvVal === 0) ? "#999" : "#333";
+    lhvInput.style.color = (lhvVal === 0) ? "#999" : "#333";
+}
+
+/*** ฟังก์ชันหลักในการคำนวณ (Page 1)*/
+function runCombustionCalc() {
+    const outSection = document.getElementById('output-section');
+    
+    // ฟังก์ชันดึงค่าจากช่อง Input
+    const getNum = (id) => {
+        const v = document.getElementById(id).value;
+        return v === "" ? 0 : parseFloat(v);
+    };
+
+    // 1. ดึงข้อมูลจากหน้าบ้าน
+    const waste = getNum('in_waste');
+    const hhv   = getNum('in_hhv');
+    const lhvIn = getNum('in_lhv');
+    const m     = getNum('in_moisture');
+    const e     = getNum('in_excess_air');
+    const pa    = getNum('in_pa_ratio');
+    const sa    = getNum('in_sa_ratio');
+
+    // 2. ระบบแจ้งเตือน (English Alerts) ก่อนคำนวณ
+    if (m > 100 || m <= 0) {
+        alert("Warning: Moisture (M) must be between 1% and 100%.");
+        return;
+    }
+    if (e > 1) {
+        alert("Warning: Excess Air Ratio (E) must not exceed 1.0.");
+        return;
+    }
+    if (pa + sa !== 100) {
+        alert("Warning: The sum of Primary Air (PA) and Secondary Air (SA) must be exactly 100%. (Current: " + (pa + sa) + "%)");
+        return;
+    }
+    if (waste <= 0) {
+        alert("Please enter the Amount of Solid Waste.");
+        return;
+    }
+
+    // 3. จัดการค่าความร้อน (Back-end Hidden Calculation)
+    let lhv_calc = 0;
+    if (lhvIn > 0) {
+        // ใช้ LHV ที่ผู้ใช้กรอก
+        lhv_calc = lhvIn;
+    } else if (hhv > 0) {
+        // แปลง HHV เป็น LHV เงียบๆ หลังบ้าน (ไม่แสดงผลในช่อง input)
+        // สูตร: LHV = HHV - (24.42 * M)
+        lhv_calc = hhv - (24.42 * m);
+    } else {
+        alert("Please enter either HHV or LHV (Enter 0 in the unused field).");
+        return;
+    }
+
+    // 4. [พาร์ท 1] คำนวณมวลอากาศ (Mass Flow - ṁ)
+    const m_fuel_hr = (waste * 1000) / 24; 
+    // สูตรตามลายมือ: 0.33 * ((LHV*100)/(100-M)) * (1/1000) * (1+E) * m_fuel_hr
+    const m_dot_air = 0.85 * (lhv_calc / 1000) * (1 + e) * m_fuel_hr;
+    const m1 = m_dot_air * (pa / 100); 
+    const m2 = m_dot_air * (sa / 100);
+
+    // 5. [พาร์ท 2] คำนวณปริมาตรอากาศ (Volumetric Flow - V̇)
+    // สูตร: V = m / 1.293 (Normal Density)
+    const v_dot_air = m_dot_air / 1.293;
+    const v1 = v_dot_air * (pa / 100); 
+    const v2 = v_dot_air * (sa / 100);
+
+    // 6. แสดงผลลัพธ์ในตาราง
+    document.getElementById('res_ma').value  = m_dot_air.toFixed(2);
+    document.getElementById('res_map').value = m1.toFixed(2);
+    document.getElementById('res_mas').value = m2.toFixed(2);
+    document.getElementById('res_va').value  = v_dot_air.toFixed(2);
+    document.getElementById('res_vap').value = v1.toFixed(2);
+    document.getElementById('res_vas').value = v2.toFixed(2);
+
+    // 7. อัปเดตตัวเลขบนรูปภาพเป็นค่า "ปริมาตร" (V̇) พร้อมหน่วย
+    document.getElementById('box-val-pri').innerText = v1.toFixed(2);
+    document.getElementById('box-val-sec').innerText = v2.toFixed(2);
+
+    // แสดงส่วนผลลัพธ์และเลื่อนหน้าจอ
+    outSection.style.setProperty('display', 'block', 'important');
+    setTimeout(() => {
+        document.getElementById('status-display').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+</script>
+        <!-- จบส่วนที่ 1 Combustion Air Quantity -->
+
+        <!-- เริ่มส่วนที่ 2  Exhaust Gas Generation -->
+<div id="page-2" class="page-section">
+  <h3 class="section-title">Exhaust Gas Generation</h3>
+
+  <div class="grid-table">
+    <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
+    
+    <div class="grid-cell bg-header">Parameter</div>
+    <div class="grid-cell bg-header">Symbol</div>
+    <div class="grid-cell bg-header">Value</div>
+    <div class="grid-cell bg-header">Unit</div>
+
+    <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
+    <div class="grid-cell bg-blue">W</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_waste2" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">ton/day</div>
+    
+    <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
+    <div class="grid-cell bg-blue">HHV</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv2" class="inner-input" oninput="validateLive2()" placeholder="Enter HHV (or 0 if use LHV)"></div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
+    <div class="grid-cell bg-pink">LHV</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv2" class="inner-input" oninput="validateLive2()" placeholder="Enter LHV (or 0 if use HHV)"></div>
+    <div class="grid-cell bg-pink">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Moisture</div>
+    <div class="grid-cell bg-blue">M</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_moisture2" class="inner-input" oninput="validateLive2()" placeholder="0-100%"></div>
+    <div class="grid-cell bg-blue">%wt</div>
+
+    <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
+    <div class="grid-cell bg-blue">E</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air2" class="inner-input" oninput="validateLive2()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-blue"></div>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <button type="button" class="btn-calc" onclick="runExhaustCalc()" style="width: 100%; max-width: 500px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Exhaust Gas</button>
+  </div>
+
+  <div id="output-section2" style="display: none !important;">
+    <div id="status-display2" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
+      <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
+    </div>
+
+    <div class="grid-table">
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Exhaust Gas Results</div>
+      <div class="grid-cell bg-yellow left-align">Exhaust Gas Generation</div>
+      <div class="grid-cell bg-yellow">V̇<sub>gas</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="res_vg" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">Nm³/hr</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; width: 100%;">
+    <div style="position: relative; display: inline-block; margin: 0 auto;">
+      <img src="image/Exhaust Gas.png" style="width: 100%; max-width: 550px; height: auto; display: block; border-radius: 8px;">
+
+      <div style="position: absolute; top: 56%; left: 0%; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <div id="box-val-gas" class="img-overlay-val">0.00</div>
+          <div class="img-overlay-unit">Nm³/hr</div>
+      </div>
+    </div>
+ </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+      <button type="button" onclick="showPage(1)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
+      <button type="button" onclick="showPage(3)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function validateLive2() {
+    const mInput = document.getElementById('in_moisture2');
+    const eInput = document.getElementById('in_excess_air2');
+    const hhvInput = document.getElementById('in_hhv2');
+    const lhvInput = document.getElementById('in_lhv2');
+
+    const mVal = parseFloat(mInput.value) || 0;
+    const eVal = parseFloat(eInput.value) || 0;
+    const hhvVal = parseFloat(hhvInput.value) || 0;
+    const lhvVal = parseFloat(lhvInput.value) || 0;
+
+    // เปลี่ยนสีตามเงื่อนไข
+    mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
+    eInput.style.color = (eVal > 1) ? "red" : (eVal > 0 ? "green" : "");
+    hhvInput.style.color = (parseFloat(hhvInput.value) === 0) ? "#999" : "#333";
+    lhvInput.style.color = (parseFloat(lhvInput.value) === 0) ? "#999" : "#333";
+}
+
+function runExhaustCalc() {
+    const outSection = document.getElementById('output-section2');
+    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+
+    const waste = getNum('in_waste2');
+    const hhv   = getNum('in_hhv2');
+    const lhvIn = getNum('in_lhv2');
+    const m     = getNum('in_moisture2');
+    const e     = getNum('in_excess_air2');
+
+    // ตรวจสอบข้อมูลก่อนคำนวณ
+    if (m > 100 || m <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
+    if (e > 1) { alert("Warning: Excess Air Ratio must not exceed 1.0"); return; }
+    if (waste <= 0) { alert("Please enter the Amount of Solid Waste."); return; }
+
+    // 3. จัดการค่าความร้อน (Back-end Hidden Calculation)
+    let lhv_calc = 0;
+    if (lhvIn > 0) {
+        // ใช้ LHV ที่ผู้ใช้กรอก
+        lhv_calc = lhvIn;
+    } else if (hhv > 0) {
+        // แปลง HHV เป็น LHV เงียบๆ หลังบ้าน (ไม่แสดงผลในช่อง input)
+        // สูตร: LHV = HHV - (24.42 * M)
+        lhv_calc = hhv - (24.42 * m);
+    } else {
+        alert("Please enter either HHV or LHV (Enter 0 in the unused field).");
+        return;
+    }
+
+    // คำนวณมวลอากาศ (Mass Flow - ṁ)
+    const m_fuel_hr = (waste * 1000) / 24; 
+    
+    // คำนวณตามโครงสร้างสูตรในรูป:
+    // Vgas = [ w_hr * (1 + (0.33 * (LHV*100/(100-M)) * (1/1000) * (1+E))) ] / 1.293
+    const m_dot_air = 0.85 * (lhv_calc / 1000) * (1 + e) * m_fuel_hr;
+    const m_gas = m_fuel_hr + m_dot_air;
+    const v_gas_total = m_gas / 1.293;
+
+    // แสดงผลลัพธ์
+    document.getElementById('res_vg').value = v_gas_total.toFixed(2);
+
+    // อัปเดตตัวเลขบนรูปภาพเป็นค่า "ปริมาตร" (V̇) พร้อมหน่วย
+    document.getElementById('box-val-gas').innerText = v_gas_total.toFixed(2);
+
+    // แสดงส่วนผลลัพธ์
+    outSection.style.setProperty('display', 'block', 'important');
+    setTimeout(() => {
+        document.getElementById('status-display2').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+</script>
+        <!-- จบส่วนที่ 2 Exhaust Gas Generation-->
+        <!-- เริ่มส่วนที่ 3  Combustion Temperature -->
+<div id="page-3" class="page-section">
+  <h3 class="section-title">Combustion Temperature</h3>
+
+  <div class="grid-table">
+    <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
+    
+    <div class="grid-cell bg-header">Parameter</div>
+    <div class="grid-cell bg-header">Symbol</div>
+    <div class="grid-cell bg-header">Value</div>
+    <div class="grid-cell bg-header">Unit</div>
+
+    <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
+    <div class="grid-cell bg-blue">W</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_waste3" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">ton/day</div>
+    
+    <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
+    <div class="grid-cell bg-blue">HHV</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_hhv3" class="inner-input" oninput="validateLive3()" placeholder="Enter HHV (or 0 if use LHV)"></div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
+    <div class="grid-cell bg-pink">LHV</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_lhv3" class="inner-input" oninput="validateLive3()" placeholder="Enter LHV (or 0 if use HHV)"></div>
+    <div class="grid-cell bg-pink">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Moisture</div>
+    <div class="grid-cell bg-blue">M</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_moisture3" class="inner-input" oninput="validateLive3()" placeholder="0-100%"></div>
+    <div class="grid-cell bg-blue">%wt</div>
+
+    <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
+    <div class="grid-cell bg-blue">E</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air3" class="inner-input" oninput="validateLive3()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-blue"></div>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <button type="button" class="btn-calc" onclick="runTempCalc()" style="width: 100%; max-width: 500px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Combustion Temperature</button>
+  </div>
+
+  <div id="output-section3" style="display: none !important;">
+    <div id="status-display3" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
+      <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
+    </div>
+
+    <div class="grid-table">
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Thermal Energy Input</div>
+      <div class="grid-cell bg-yellow left-align">Heat Energy from Fuel</div>
+      <div class="grid-cell bg-yellow">Q̇<sub>fuel</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="Q_fuel" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">kJ/hr</div>
+
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Combustion Temperature</div>
+      <div class="grid-cell bg-yellow left-align">Combustion Temperature</div>
+      <div class="grid-cell bg-yellow">T<sub>comb</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="T_comb" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">°C</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; width: 100%;"> 
+  <div style="position: relative; display: inline-block; margin: 0 auto;">
+    <img src="image/Combustion Temperature.png" style="width: 100%; max-width: 550px; height: auto; display: block; border-radius: 8px;">
+
+    <div style="position: absolute; top: 36%; left: 68%; display: flex; gap: 4px;">
+      <div id="box-val-gas3" class="img-overlay-val">0.00</div>
+      <div class="img-overlay-unit">°C</div>
+    </div>
+  </div>
+</div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+      <button type="button" onclick="showPage(2)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
+      <button type="button" onclick="showPage(4)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function validateLive3() {
+    const mInput = document.getElementById('in_moisture3');
+    const eInput = document.getElementById('in_excess_air3');
+    const hhvInput = document.getElementById('in_hhv3');
+    const lhvInput = document.getElementById('in_lhv3');
+
+    const mVal = parseFloat(mInput.value) || 0;
+    const eVal = parseFloat(eInput.value) || 0;
+    const hhvVal = parseFloat(hhvInput.value) || 0;
+    const lhvVal = parseFloat(lhvInput.value) || 0;
+
+    // เปลี่ยนสีตามเงื่อนไข
+    mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
+    eInput.style.color = (eVal > 1) ? "red" : (eVal > 0 ? "green" : "");
+    hhvInput.style.color = (parseFloat(hhvInput.value) === 0) ? "#999" : "#333";
+    lhvInput.style.color = (parseFloat(lhvInput.value) === 0) ? "#999" : "#333";
+}
+
+function runTempCalc() {
+    // 1. ดึงค่า Input
+    const outSection = document.getElementById('output-section3');
+    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+    
+    const waste = getNum('in_waste3');
+    const hhv = getNum('in_hhv3');
+    const lhvIn = getNum('in_lhv3');
+    const m     = getNum('in_moisture3');
+    const e     = getNum('in_excess_air3');
+
+    // 2. ตรวจสอบข้อมูล
+    if (m > 100 || m <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
+    if (e > 1) { alert("Warning: Excess Air Ratio must not exceed 1.0"); return; }
+    if (waste <= 0) { alert("Please enter the Amount of Solid Waste."); return; }
+
+    // 3. คำนวณค่าทางความร้อน (เหมือนหน้า 1-2)
+    let lhv_calc = (lhvIn > 0) ? lhvIn : (hhv - (24.42 * m));
+    const m_fuel_hr = (waste * 1000) / 24;
+    const m_dot_air = 0.85 * (lhv_calc / 1000) * (1 + e) * m_fuel_hr;
+
+    // 4. คำนวณพลังงาน (Heat Energy)
+    // Q_fuel (kJ/hr) = m_fuel * LHV
+    const q_fuel = m_fuel_hr * lhv_calc;
+    
+    // 5. คำนวณอุณหภูมิการเผาไหม้ (T_comb)
+    // สูตรจาก PDF: T_comb = (Q_fuel + Q_air) / (V_gas * rho_gas * Cp_gas)  
+    const t_comb = ((q_fuel / (1.15 * (m_fuel_hr + m_dot_air)))  + 298) - 273;
+
+    // 6. แสดงผลลัพธ์ลงในช่อง Output (แปลงหน่วยเป็นต่อ Day สำหรับ Q ตาม Label ใน HTML)
+    document.getElementById('Q_fuel').value = q_fuel.toFixed(2);
+    document.getElementById('T_comb').value = t_comb.toFixed(2);
+
+    // 7. อัปเดตตัวเลขบนรูปภาพ
+    document.getElementById('box-val-gas3').innerText = t_comb.toFixed(2);
+    // เปลี่ยนหน่วยในรูปให้ตรงกับค่าที่โชว์ (ในรูปเป็น Nm3/hr แต่ค่าที่คำนวณคือ Temp)
+    const unitLabel = document.querySelector('#page-3 .img-overlay-unit');
+    if (unitLabel) unitLabel.innerText = "°C";
+
+    // แสดงส่วนผลลัพธ์
+    document.getElementById('output-section3').style.setProperty('display', 'block', 'important');
+    setTimeout(() => {
+        document.getElementById('status-display3').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+</script>
+      <!-- จบส่วนที่ 3  Combustion Temperature -->
+      <!-- เริ่มส่วนที่ 4  Steam Generation Rate -->
+<div id="page-4" class="page-section">
+  <h3 class="section-title">Steam Generation Rate</h3>
+
+  <div class="grid-table">
+    <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
+    
+    <div class="grid-cell bg-header">Parameter</div>
+    <div class="grid-cell bg-header">Symbol</div>
+    <div class="grid-cell bg-header">Value</div>
+    <div class="grid-cell bg-header">Unit</div>
+
+    <div class="grid-cell bg-blue left-align">Boiler Efficiency</div>
+    <div class="grid-cell bg-blue">ƞ<sub>boiler</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="eff" class="inner-input" oninput="validateLive4()" placeholder="0-100%"></div>
+    <div class="grid-cell bg-blue">%</div>
+    
+    <div class="grid-cell bg-blue left-align">Exhaust Gas Temperature&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
+    <div class="grid-cell bg-blue">T<sub>gas, out</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_gas_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">°C</div>
+
+    <div class="grid-cell bg-blue left-align">Inlet water Temperature&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
+    <div class="grid-cell bg-blue">T<sub>w, in</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_w_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">°C</div>
+
+    <div class="grid-cell bg-blue left-align">Steam Outlet Temperature&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
+    <div class="grid-cell bg-blue">T<sub>w, out</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_w_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">°C</div>
+
+    <div class="grid-cell bg-blue left-align">Steam Outlet Pressure&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
+    <div class="grid-cell bg-blue">P<sub>w, out</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="P_w_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">MPa</div>
+
+    <div class="grid-cell bg-blue left-align">Feedwater Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
+    <div class="grid-cell bg-blue">h<sub>w, in</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_w_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Exhaust Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
+    <div class="grid-cell bg-blue">h<sub>w, out</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_w_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Exhaust Gas Generation</div>
+    <div class="grid-cell bg-blue">V̇<sub>gas</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="res_vg4" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">Nm³/hr</div>
+    
+    <div class="grid-cell bg-blue left-align">Combustion Temperature</div>
+    <div class="grid-cell bg-blue">T<sub>comb</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_comb4" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">°C</div>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <button type="button" class="btn-calc" onclick="runSteamCalc()" style="width: 100%; max-width: 500px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Steam Generation Rate</button>
+  </div>
+
+  <div id="output-section4" style="display: none !important;">
+    <div id="status-display4" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
+      <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
+    </div>
+
+    <div class="grid-table">
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Flue Gas Tube Heat Transfer</div>
+      <div class="grid-cell bg-yellow left-align">Exhaust Gas Heat</div>
+      <div class="grid-cell bg-yellow">Q̇<sub>gas, out</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="Q_gasout" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">kJ/kg</div>
+
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Water Tube Steam Generation</div>
+      <div class="grid-cell bg-yellow left-align">Steam Flow Rate</div>
+      <div class="grid-cell bg-yellow">ṁ<sub>w</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="m_w4" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">ton/hr</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; width: 100%;"> 
+  <div style="position: relative; display: inline-block; margin: 0 auto;">
+    <img src="image/Boiler.png" style="width: 100%; max-width: 550px; height: auto; display: block; border-radius: 8px;">
+
+    <div style="position: absolute; top: 10%; left: 77%; display: flex; gap: 4px;">
+      <div id="box-val-steam" class="img-overlay-val">0.00</div>
+      <div class="img-overlay-unit">ton/hr</div>
+    </div>
+  </div>
+  </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+      <button type="button" onclick="showPage(3)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
+      <button type="button" onclick="showPage(5)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function validateLive4() {
+    const eff = document.getElementById('eff');
+    const TgasOut = document.getElementById('T_gas_out');
+    const TwaterIn = document.getElementById('T_w_in');
+    const TwaterOut = document.getElementById('T_w_out');
+    const PwaterOut = document.getElementById('P_w_out');
+    const Feedwater = document.getElementById('h_w_in');
+    const Exhaust4 = document.getElementById('h_w_out');
+    const res_vg4 = document.getElementById('res_vg4');
+    const T_comb4 = document.getElementById('T_comb4');
+
+    const effVal = parseFloat(eff.value) || 0;
+    const TgasOutVal = parseFloat(TgasOut.value) || 0;
+    const TwaterInVal = parseFloat(TwaterIn.value) || 0;
+    const TwaterOutVal = parseFloat(TwaterOut.value) || 0;
+    const PwaterOutVal = parseFloat(PwaterOut.value) || 0;
+    const FeedwaterVal = parseFloat(Feedwater.value) || 0;
+    const Exhaust4Val = parseFloat(Exhaust4.value) || 0;
+    const res_vg4Val = parseFloat(res_vg4.value) || 0;
+    const T_comb4Val = parseFloat(T_comb4.value) || 0;
+
+    // เปลี่ยนสีตามเงื่อนไข
+    eff.style.color = (effVal > 100 || effVal <= 0) ? "red" : "green";
+}
+
+function runSteamCalc() {
+    // 1. ดึงค่า Input
+    const outSection = document.getElementById('output-section4');
+    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+    
+    const eff = getNum('eff');
+    const TgasOut = getNum('T_gas_out');
+    const TwaterIn = getNum('T_w_in');
+    const TwaterOut = getNum('T_w_out');
+    const PwaterOut = getNum('P_w_out');
+    const Feedwater = getNum('h_w_in');
+    const Exhaust4 = getNum('h_w_out');
+    const res_vg4 = getNum('res_vg4');
+    const T_comb4 = getNum('T_comb4');
+
+    // 2. ตรวจสอบข้อมูล
+    if (eff > 100 || eff <= 0) { alert("Warning: Moisture must be 1-100%"); return; }
+
+    // ถ้าลืมกรอกข้อมูลให้เตือน (เพิ่มให้ครบทุกช่อง)
+    if(!eff || !TgasOut || !TwaterIn || !TwaterOut || !PwaterOut || !Feedwater || !Exhaust4 || !res_vg4 || !T_comb4) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    // 3. คำนวณ
+    const Q_dot_gas_out = res_vg4 * 1.15 * (T_comb4 -TgasOut) * (eff/100);
+    const m_dot_w = (Q_dot_gas_out / (Exhaust4 - Feedwater))/1000;
+
+    // สั่งโชว์ผลลัพธ์
+    document.getElementById('output-section4').style.display = 'block';
+    
+    document.getElementById('Q_gasout').value = Q_dot_gas_out.toFixed(2);
+    document.getElementById('m_w4').value = m_dot_w.toFixed(2);
+
+    // อัปเดตตัวเลขบนรูปภาพ
+    document.getElementById('box-val-steam').innerText = m_dot_w.toFixed(2);
+    
+    // เลื่อนหน้าจอลงมาดูผล
+    document.getElementById('output-section4').scrollIntoView({ behavior: 'smooth' });
+}
+
+</script>
+      <!-- จบส่วนที่ 4  Steam Generation Rate -->
+      <!-- เริ่มส่วนที่ 5  Turbine And Generator -->
+<div id="page-5" class="page-section">
+  <h3 class="section-title">Turbine And Generator</h3>
+
+  <div class="grid-table">
+    <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
+    
+    <div class="grid-cell bg-header">Parameter</div>
+    <div class="grid-cell bg-header">Symbol</div>
+    <div class="grid-cell bg-header">Value</div>
+    <div class="grid-cell bg-header">Unit</div>
+
+    <div class="grid-cell bg-blue left-align">Inlet water Temperature&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
+    <div class="grid-cell bg-blue">T<sub>in</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="T_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">°C</div>
+
+    <div class="grid-cell bg-blue left-align">Inlet Steam Pressure&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
+    <div class="grid-cell bg-blue">P<sub>in</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="P_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">MPa</div>
+
+    <div class="grid-cell bg-blue left-align">Outlet Steam Pressure&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
+    <div class="grid-cell bg-blue">P<sub>out</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="P_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">MPa</div>
+
+    <div class="grid-cell bg-blue left-align">Generator Power Factor&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
+    <div class="grid-cell bg-blue">P.F.</div>
+    <div class="grid-cell bg-white-box"><input type="number" id="PF" class="inner-input" oninput="validateLive5()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-blue"></div>
+
+    <div class="grid-cell bg-blue left-align">Inlet Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
+    <div class="grid-cell bg-blue">h<sub>in</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Exhaust Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
+    <div class="grid-cell bg-blue">h<sub>out</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">kJ/kg</div>
+
+    <div class="grid-cell bg-blue left-align">Steam Flow Rate</div>
+    <div class="grid-cell bg-blue">ṁ<sub>w</sub></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="m_w5" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-blue">ton/hr</div>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <button type="button" class="btn-calc" onclick="runTurbineCalc()" style="width: 100%; max-width: 500px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Turbine And Generator</button>
+  </div>
+
+  <div id="output-section5" style="display: none !important;">
+    <div id="status-display5" style="text-align: center; background: #f0faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d0e8ff;">
+      <h4 style="color: #28a745; margin: 0;">Status: Calculation Completed (See figures in the image)</h4>
+    </div>
+
+    <div class="grid-table">
+      <div class="grid-cell bg-yellow left-align">Turbine Work Output</div>
+      <div class="grid-cell bg-yellow">Ẇ<sub>out, turbine</sub></div>
+      <div class="grid-cell bg-white-box"><input type="text" id="w_turbine" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">MW</div>
+
+      <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Generator Power Output</div>
+      <div class="grid-cell bg-yellow left-align">Generator Power Output</div>
+      <div class="grid-cell bg-yellow">Ẇ<sub>out, gen</div>
+      <div class="grid-cell bg-white-box"><input type="text" id="w_gen" class="inner-input" readonly></div>
+      <div class="grid-cell bg-yellow">MW</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; width: 100%;"> 
+  <div style="position: relative; display: inline-block; margin: 0 auto;">
+    <img src="image/Turbandgen.png" style="width: 100%; max-width: 550px; height: auto; display: block; border-radius: 8px;">
+
+    <div style="position: absolute; top: 15%; left: 10%; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <div id="box-val-turbine" class="img-overlay-val">0.00</div>
+      <div class="img-overlay-unit">MW</div>
+    </div>
+
+    <div style="position: absolute; top: 15%; left: 80%; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+      <div id="box-val-gen" class="img-overlay-val">0.00</div>
+      <div class="img-overlay-unit">MW</div>
+    </div>
+  </div>
+  </div>
+
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+      <button type="button" onclick="showPage(4)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
+      <button type="button" onclick="showPage(6)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function validateLive5() {
+    // ต้องอ้างอิงถึง Element ให้ถูกตัว
+    const PFInput = document.getElementById('PF');
+    const PFVal = parseFloat(PFInput.value) || 0;
+
+    // เปลี่ยนสีตามเงื่อนไข
+    PFInput.style.color = (PFVal > 1) ? "red" : (PFVal > 0 ? "green" : "");
+}
+
+function runTurbineCalc() {
+    // 1. ดึงค่า Input
+    const getNum = (id) => parseFloat(document.getElementById(id).value) || 0;
+    
+    // ดึงค่ามาเก็บไว้ในตัวแปร (ตัดคำว่า Input ออกเพื่อให้สอดคล้องกับตอนเช็คเงื่อนไขข้างล่าง)
+    const T_in = getNum('T_in');
+    const P_in = getNum('P_in');
+    const P_out = getNum('P_out');
+    const PF = getNum('PF');
+    const h_in = getNum('h_in');
+    const h_out = getNum('h_out');
+    const m_w5 = getNum('m_w5'); // แก้จาก m_w5t เป็น m_w5 ให้ตรงกับ ID ใน HTML
+
+    // 2. ตรวจสอบข้อมูล
+    // เช็คค่าว่างของ PF ก่อนตามที่ต้องการ
+    if (document.getElementById('PF').value.trim() === "") {
+        alert("Please enter Generator Power Factor");
+        return;
+    }
+
+    if (PF > 1) { 
+        alert("Warning: Power Factor must not exceed 1.0"); 
+        return; 
+    }
+
+    // ถ้าลืมกรอกข้อมูลให้เตือน (เช็คจากตัวแปรที่ดึงมา)
+    if(!T_in || !P_in || !P_out || !PF || !h_in || !h_out || !m_w5) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    // 3. คำนวณ (ใช้ชื่อตัวแปรให้ตรงกับที่ประกาศไว้ข้างบน)
+    // สูตร: MW = (ton/hr * kJ/kg) / 3600
+    const m_dot_out_t = (m_w5 * (h_in - h_out)) / 3600;
+    const m_dot_out_g = m_dot_out_t * PF;
+
+    // 4. แสดงผลลัพธ์
+    document.getElementById('output-section5').style.setProperty('display', 'block', 'important');
+    
+    document.getElementById('w_turbine').value = m_dot_out_t.toFixed(2);
+    document.getElementById('w_gen').value = m_dot_out_g.toFixed(2);
+    
+    // อัปเดตตัวเลขในรูปภาพด้วย
+    document.getElementById('box-val-turbine').innerText = m_dot_out_t.toFixed(2);
+    document.getElementById('box-val-gen').innerText = m_dot_out_g.toFixed(2);
+    
+    // เลื่อนหน้าจอลงมาดูผล
+    document.getElementById('output-section5').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</script>
+      <!-- จบส่วนที่ 5  Steam Generation Rate -->
+      <!-- เริ่มส่วนที่ 6  Summery -->
+<div id="page-sum" class="page-section">
+  <h3 class="section-title">Overall Summary</h3>
+  
+  <div style="position: relative; margin: 0 auto; display: table; line-height: 0;">
+    
+    <img src="image/Total.png" style="width: 100%; max-width: 800px; height: auto; border-radius: 10px; display: block;">
+
+    <div style="position: absolute; top: 87%; left: 33.5%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+        <div id="sum-val-sec" class="img-overlay-val2">0.00</div>
+        <div class="img-overlay-unit2">Nm³/hr</div>
+    </div>
+
+    <div style="position: absolute; top: 15%; left: 19.5%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+        <div id="sum-val-pri" class="img-overlay-val2">0.00</div>
+        <div class="img-overlay-unit2">Nm³/hr</div>
+    </div>
+
+    <div style="position: absolute; top: 10%; left: 68.5%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+        <div id="sum-val-gas" class="img-overlay-val2">0.00</div>
+        <div class="img-overlay-unit2">Nm³/hr</div>
+    </div>
+
+    <div style="position: absolute; top: 23%; left: 18%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+        <div id="sum-val-gas3" class="img-overlay-val2">0.00</div>
+        <div class="img-overlay-unit2">°C</div>
+    </div>
+
+    <div style="position: absolute; top: 90%; left: 52%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+        <div id="sum-val-steam" class="img-overlay-val2">0.00</div>
+        <div class="img-overlay-unit2">ton/hr</div>
+    </div>
+
+    <div style="position: absolute; top: 24%; left: 55%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+        <div id="sum-val-turbine" class="img-overlay-val2">0.00</div>
+        <div class="img-overlay-unit2">MW</div>
+    </div>
+
+    <div style="position: absolute; top: 88%; left: 84%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+      <div id="sum-val-gen" class="img-overlay-val2">0.00</div>
+      <div class="img-overlay-unit2">MW</div>
+    </div>
+  </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+      <button type="button" onclick="showPage(5)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
+  </div>
+</div>
+
+<script>
+function updateSummary() {
+    // 1. ดึงค่าจากหน้า 1 (ดึงจาก innerText ของกล่องบนรูปหน้า 1)
+    const valPri = document.getElementById('box-val-pri').innerText;
+    const valSec = document.getElementById('box-val-sec').innerText;
+    
+    // 2. ดึงค่าจากหน้า 2 (Exhaust Gas)
+    const valGas = document.getElementById('box-val-gas').innerText;
+
+    // 3. ดึงค่าจากหน้า 3
+    const valGas3 = document.getElementById('box-val-gas3').innerText;
+
+    // 4. ดึงค่าจากหน้า 4
+    const valSteam = document.getElementById('box-val-steam').innerText;
+    
+    // 5. ดึงค่าจากหน้า 5
+    const valTur = document.getElementById('box-val-turbine').innerText;
+    const valGen = document.getElementById('box-val-gen').innerText;
+
+    // 6. เอาค่าไปหย่อนลงใน ID ของหน้า 6
+    document.getElementById('sum-val-pri').innerText = valPri;
+    document.getElementById('sum-val-sec').innerText = valSec;
+    document.getElementById('sum-val-gas').innerText = valGas;
+    document.getElementById('sum-val-gas3').innerText = valGas3;
+    document.getElementById('sum-val-steam').innerText = valSteam;
+    document.getElementById('sum-val-turbine').innerText = valTur;
+    document.getElementById('sum-val-gen').innerText = valGen;
+}
+
+</script>
+      <!-- จบส่วนที่ 6  Summery -->
+    </div>
+  </main>
+
+  <footer>
+    <footer id="contact-section">
+
+    <div class="footer-content">
+      <div class="f-col-info">
+        <div class="footer-logo-area">
+          <img src="image/PP AND MSW LOGO.png" style="height: 80px;"></div>
+        <h3>Heating Value Calculation and Municipal Solid Waste (MSW)</h3>
+        <h3 style="margin-top:0;">Power Plant Potential Assessment System</h3>
+        <p>Mathematical Modeling for Predicting Calorific Value and Electrical Power Generation from MSW</p>
+      </div>
+
+      <div class="f-col-menu">
+        <div class="f-title">MENU</div>
+        <ul class="f-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="HHV_test.html">HHV Calculator</a></li>
+          <li><a href="PPformularTest1.html">Power Plant Performance</a></li>
+          <li><a href="manual.html">User Manual</a></li>
+        </ul>
+      </div>
+
+      <div class="f-col-contact">
+        <div class="f-title">Contact Us</div>
+        <div class="contact-detail">
+          <p><strong>The Waste Incineration Research Center (WIRC)</strong></p>
+          <p>Department of Mechanical and Aerospace Engineering</p>
+          <p>King Mongkut's University of Technology North Bangkok 1518 </p>
+          <p>Pibulsongkram Road, Bangsue, Bangkok 10800 </p>
+          <p style="margin-top: 15px;">Email: somrat.k@eng.kmutnb.ac.th</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="copyright">
+      Copyright © 2026 WIRC, KMUTNB. All Rights Reserved.
+    </div>
+  </footer>
+
+  <!-- javascript -->
+  <script>
+    // --- ฟังก์ชัน 1: สำหรับเปลี่ยนหน้า (Tab) ---
+function goToPage(pageNum) {
+    // 1. หาหน้าทุกหน้าที่มี class "page-section" แล้วซ่อนให้หมด
+    const pages = document.querySelectorAll('.page-section');
+    pages.forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none'; // บังคับซ่อนแบบเด็ดขาด
+    });
+
+    // 2. แสดงเฉพาะหน้าเป้าหมาย
+    const targetId = (pageNum === 'sum') ? 'page-sum' : 'page-' + pageNum;
+    const targetPage = document.getElementById(targetId);
+    
+    if (targetPage) {
+        targetPage.classList.add('active');
+        targetPage.style.display = 'block'; // บังคับโชว์
+    }
+
+    // 3. เปลี่ยนสีปุ่มเมนู Sidebar
+    const buttons = document.querySelectorAll('.nav-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    
+    // หาปุ่มที่ถูกคลิกและทำให้มันเข้มขึ้น (Active)
+    if (pageNum === 'sum') {
+        buttons[5].classList.add('active');
+    } else {
+        const btnIdx = parseInt(pageNum) - 1;
+        if (buttons[btnIdx]) buttons[btnIdx].classList.add('active');
+    }
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// --- ใช้ฟังก์ชันนี้อันเดียว คุมทั้ง Sidebar และปุ่ม Next/Prev ---
+function goToPage(pageNum) {
+    // 1. หาหน้าทุกหน้าที่มี class "page-section" แล้วซ่อนให้หมด
+    const pages = document.querySelectorAll('.page-section');
+    pages.forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none'; // บังคับซ่อน
+    });
+
+    // 2. แสดงเฉพาะหน้าเป้าหมาย
+    const targetId = (pageNum === 'sum') ? 'page-sum' : 'page-' + pageNum;
+    const targetPage = document.getElementById(targetId);
+    
+    if (targetPage) {
+        targetPage.classList.add('active');
+        targetPage.style.display = 'block'; // บังคับโชว์
+    }
+
+    // 3. เปลี่ยนสีปุ่มเมนู Sidebar ให้ตรงกับหน้าที่แสดงอยู่
+    const buttons = document.querySelectorAll('.nav-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    
+    if (pageNum === 'sum') {
+        if (buttons[5]) buttons[5].classList.add('active');
+        updateSummary(); // เรียกดึงค่ามาโชว์ที่หน้า Summary
+    } else {
+        const btnIdx = parseInt(pageNum) - 1;
+        if (buttons[btnIdx]) buttons[btnIdx].classList.add('active');
+    }
+    
+    // 4. เลื่อนจอไปด้านบนสุด
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// สร้างชื่อเล่นให้ฟังก์ชัน เผื่ออายไปเรียกใช้ชื่อ showPage ในปุ่ม Next/Prev
+function showPage(n) {
+    goToPage(n);
+}
+
+// --- ฟังก์ชัน 2: เปิด/ปิด เมนูมือถือ ---
+function toggleMenu() {
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('menuOverlay');
+    if (menu.classList.contains('active')) {
+        menu.classList.remove('active');
+        overlay.classList.remove('active');
+    } else {
+        menu.classList.add('active');
+        overlay.classList.add('active');
+    }
+}
+  </script>
+
+</body>
+</html>
+
+
+ 
