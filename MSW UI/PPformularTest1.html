@@ -985,6 +985,11 @@ function runSteamCalc() {
   <div class="grid-table">
     <div class="grid-cell bg-grey-section" style="grid-column: span 4;">Design Criteria</div>
 
+    <div class="grid-cell bg-header">Parameter</div>
+    <div class="grid-cell bg-header">Symbol</div>
+    <div class="grid-cell bg-header">Value</div>
+    <div class="grid-cell bg-header">Unit</div>
+
     <div class="grid-cell bg-blue left-align">Generator Power Factor&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
     <div class="grid-cell bg-blue">P.F.</div>
     <div class="grid-cell bg-white-box"><input type="number" id="PF" class="inner-input" oninput="validateLive5()" placeholder="Max 1.0"></div>
@@ -1135,7 +1140,7 @@ function runTurbineCalc() {
         <div class="img-overlay-unit2">°C</div>
     </div>
 
-    <div style="position: absolute; top: 62.5%; left: 11.5%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
+    <div style="position: absolute; top: 62.5%; left: 12%; transform: translate(-50%, -50%); display: flex; gap: 4px; line-height: normal;">
         <div id="waste-display" class="img-overlay-val2">0.00</div>
         <div class="img-overlay-unit2">ton/day</div>
     </div>
