@@ -504,11 +504,11 @@ function validateMoisture(id) {
     const val = parseFloat(input.value) || 0;
 
     // เช็คค่าความชื้น
-    if (val > 100 || val < 1) {
+    if (val > 100 || val < 0.1) {
         // ถ้าเกิน 100 บังคับเป็นสีแดง
         input.style.setProperty('color', '#dc3545', 'important');
         input.style.fontWeight = 'bold';
-    } else if (val > 1) {
+    } else if (val > 0) {
         // ถ้าปกติ บังคับเป็นสีเขียว
         input.style.setProperty('color', '#28a745', 'important');
         input.style.fontWeight = 'bold';
