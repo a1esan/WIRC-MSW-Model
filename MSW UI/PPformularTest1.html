@@ -443,8 +443,8 @@
     <div class="app-container">
       <nav class="sidebar">
         <div class="nav-btn active" onclick="goToPage(1)">1. Combustion Air Quantity</div>
-        <div class="nav-btn" onclick="goToPage(4)">2. Steam Generation Rate</div>
-        <div class="nav-btn" onclick="goToPage(5)">3. Turbine And Generator</div>
+        <div class="nav-btn" onclick="goToPage(2)">2. Steam Generation Rate</div>
+        <div class="nav-btn" onclick="goToPage(3)">3. Turbine And Generator</div>
         <div class="nav-btn" onclick="goToPage('sum')">4. Overall Summary</div>
       </nav>
 
@@ -581,45 +581,47 @@
 
     <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
     <div class="grid-cell bg-blue">W</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_waste" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_waste" class="inner-input" oninput="validateLive()" placeholder="Enter value ..." min="0"></div>
     <div class="grid-cell bg-blue">ton/day</div>
     
     <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
     <div class="grid-cell bg-blue">HHV</div>
     <div class="grid-cell bg-white-box">
-      <input type="number" id="in_hhv" class="inner-input" oninput="validateLive()" placeholder="Enter HHV (or 0 if use LHV)">
+      <input type="number" id="in_hhv" class="inner-input" oninput="toggleHeatInputs(); validateLive()" placeholder="Enter HHV (set LHV = 0)" min="0">
     </div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
     <div class="grid-cell bg-pink">LHV</div>
     <div class="grid-cell bg-white-box">
-      <input type="number" id="in_lhv" class="inner-input" oninput="validateLive()" placeholder="Enter LHV (or 0 if use HHV)">
+      <input type="number" id="in_lhv" class="inner-input" oninput="toggleHeatInputs(); validateLive()" placeholder="Enter LHV (set HHV = 0)" min="0">
     </div>
     <div class="grid-cell bg-pink">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Moisture</div>
     <div class="grid-cell bg-blue">M</div>
     <div class="grid-cell bg-white-box">
-      <input type="number" id="in_moisture" class="inner-input" oninput="validateLive()" placeholder="0-100%">
+      <input type="number" id="in_moisture" class="inner-input" oninput="validateLive()" placeholder="0-100%" min="0">
     </div>
     <div class="grid-cell bg-blue">%wt</div>
 
     <div class="grid-cell bg-blue left-align">Excess Air Ratio</div>
     <div class="grid-cell bg-blue">E</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air" class="inner-input" oninput="validateLive()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_excess_air" class="inner-input" oninput="validateLive()" placeholder="Max 1.0" min="0"></div>
     <div class="grid-cell bg-blue"></div>
 
     <div class="grid-cell bg-blue left-align">Primary Air</div>
     <div class="grid-cell bg-blue">PA</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_pa_ratio" class="inner-input" oninput="validateLive()" placeholder="PA %"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_pa_ratio" class="inner-input" oninput="validateLive()" placeholder="0-100%" min="0"></div>
     <div class="grid-cell bg-blue">%</div>
 
     <div class="grid-cell bg-blue left-align">Secondary Air</div>
     <div class="grid-cell bg-blue">SA</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_sa_ratio" class="inner-input" oninput="validateLive()" placeholder="SA %"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_sa_ratio" class="inner-input" oninput="validateLive()" placeholder="0-100%" min="0"></div>
     <div class="grid-cell bg-blue">%</div>
   </div>
+
+  <div id="total-check-area" style="grid-column: span 3; text-align: center; margin-bottom: -10px; color: #00679a;" >* The sum of Primary Air (PA) and Secondary Air (SA) must be 100%. *</div>
 
   <div style="text-align: center; margin: 30px 0;">
     <button type="button" class="btn-calc" onclick="runCombustionCalc()" style="width: 100%; max-width: 500px; padding: 15px; cursor: pointer; font-weight: bold; background-color: #003366; color: white; border: none; border-radius: 8px;">Calculate Combustion Air Quantity</button>
@@ -681,7 +683,7 @@
     </div>
 
     <div style="text-align: right; margin-top: 20px;">
-      <button type="button" onclick="showPage(4)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+      <button type="button" onclick="showPage(2)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
     </div>
   
   </div>
@@ -690,6 +692,7 @@
 <script>
 /*** ฟังก์ชันเช็คความถูกต้องของข้อมูลและเปลี่ยนสีตัวเลขทันที (Live Validation)*/
 function validateLive() {
+    const wInput = document.getElementById('in_waste');
     const mInput = document.getElementById('in_moisture');
     const eInput = document.getElementById('in_excess_air');
     const paInput = document.getElementById('in_pa_ratio');
@@ -697,6 +700,7 @@ function validateLive() {
     const hhvInput = document.getElementById('in_hhv');
     const lhvInput = document.getElementById('in_lhv');
 
+    const wVal = parseFloat(wInput.value) || 0;
     const mVal = parseFloat(mInput.value) || 0;
     const eVal = parseFloat(eInput.value) || 0;
     const paVal = parseFloat(paInput.value) || 0;
@@ -706,19 +710,50 @@ function validateLive() {
 
     // 1. เช็ค Moisture (0-100)
     mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
+    wInput.style.color = (wVal < 1) ? "red" : "green";
+
 
     // 2. เช็ค Excess Air (ไม่เกิน 1.0)
-    eInput.style.color = (eVal > 1) ? "red" : (eVal > 0 ? "green" : "");
+    eInput.style.color = (eVal > 1 || eVal < 0.001 ) ? "red" : (eVal > 0 ? "green" : "");
+    
 
     // 3. เช็ค PA + SA (ต้องรวมได้ 100)
-    const isSumOk = (paVal + saVal === 100);
-    paInput.style.color = isSumOk ? "green" : "red";
-    saInput.style.color = isSumOk ? "green" : "red";
+    const isValid = (
+    paVal > 0 && paVal <= 100 &&
+    saVal > 0 && saVal <= 100 &&
+    (paVal + saVal === 100)
+    );
+    paInput.style.color = isValid ? "green" : "red";
+    saInput.style.color = isValid ? "green" : "red";
 
     // --- ส่วนที่เพิ่มใหม่: แยกสี HHV และ LHV ---
     // ถ้าค่าเป็น 0 ให้เป็นสีเทา (#999) ถ้ามีค่าให้เป็นสีน้ำเงินเข้ม (#003366)
-    hhvInput.style.color = (hhvVal === 0) ? "#999" : "#333";
-    lhvInput.style.color = (lhvVal === 0) ? "#999" : "#333";
+    hhvInput.style.color = (hhvVal < 0) ? "red" : "green";
+    lhvInput.style.color = (lhvVal < 0) ? "red" : "green";
+}
+
+function toggleHeatInputs() {
+    const hhvInput = document.getElementById('in_hhv');
+    const lhvInput = document.getElementById('in_lhv');
+
+    const hhvVal = parseFloat(hhvInput.value) || 0;
+    const lhvVal = parseFloat(lhvInput.value) || 0;
+
+    if (hhvVal > 0) {
+        lhvInput.style.backgroundColor = "#e9ecef";
+        lhvInput.disabled = true;
+    } else {
+        lhvInput.style.backgroundColor = "";
+        lhvInput.disabled = false;
+    }
+
+    if (lhvVal > 0) {
+        hhvInput.style.backgroundColor = "#e9ecef";
+        hhvInput.disabled = true;
+    } else {
+        hhvInput.style.backgroundColor = "";
+        hhvInput.disabled = false;
+    }
 }
 
 /*** ฟังก์ชันหลักในการคำนวณ (Page 1)*/
@@ -756,6 +791,11 @@ function runCombustionCalc() {
     if (waste <= 0) {
         alert("Please enter the Amount of Solid Waste.");
         return;
+    }
+    // ห้ามค่าติดลบ
+    if (waste < 0 || hhv < 0 || lhvIn < 0 || m < 0 || e < 0 || pa < 0 || sa < 0) {
+      alert("Negative values are not allowed. Please enter values greater than or equal to 0.");
+      return;
     }
 
     // 3. จัดการค่าความร้อน (Back-end Hidden Calculation)
@@ -806,8 +846,8 @@ function runCombustionCalc() {
 </script>
         <!-- จบส่วนที่ 1 Combustion Air Quantity -->
          
-      <!-- เริ่มส่วนที่ 4  Steam Generation Rate -->
-<div id="page-4" class="page-section">
+      <!-- เริ่มส่วนที่ 2  Steam Generation Rate -->
+<div id="page-2" class="page-section">
   <h3 class="section-title">Steam Generation Rate</h3>
 
   <div class="grid-table">
@@ -820,43 +860,43 @@ function runCombustionCalc() {
 
     <div class="grid-cell bg-blue left-align">Amount of Solid Waste</div>
     <div class="grid-cell bg-blue">W</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="in_waste4" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="in_waste4" class="inner-input" oninput="validateLive2()" placeholder="Enter value ..." min="0"></div>
     <div class="grid-cell bg-blue">ton/day</div>
     
     <div class="grid-cell bg-blue left-align">Higher Heating Value</div>
     <div class="grid-cell bg-blue">HHV</div>
     <div class="grid-cell bg-white-box">
-      <input type="number" id="in_hhv4" class="inner-input" oninput="validateLive4()" placeholder="Enter HHV (or 0 if use LHV)">
+      <input type="number" id="in_hhv4" class="inner-input"  oninput="toggleHeatInputs2(); validateLive2()" placeholder="Enter HHV (set LHV = 0)" min="0">
     </div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-pink left-align">Lower Heating Value</div>
     <div class="grid-cell bg-pink">LHV</div>
     <div class="grid-cell bg-white-box">
-      <input type="number" id="in_lhv4" class="inner-input" oninput="validateLive4()" placeholder="Enter LHV (or 0 if use HHV)">
+      <input type="number" id="in_lhv4" class="inner-input"  oninput="toggleHeatInputs2(); validateLive2()" placeholder="Enter LHV (set HHV = 0)" min="0">
     </div>
     <div class="grid-cell bg-pink">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Moisture</div>
     <div class="grid-cell bg-blue">M</div>
     <div class="grid-cell bg-white-box">
-      <input type="number" id="in_moisture4" class="inner-input" oninput="validateLive4()" placeholder="0-100%">
+      <input type="number" id="in_moisture4" class="inner-input" oninput="validateLive2()" placeholder="0-100%" min="0">
     </div>
     <div class="grid-cell bg-blue">%wt</div>
 
     <div class="grid-cell bg-blue left-align">Boiler Efficiency</div>
     <div class="grid-cell bg-blue">ƞ<sub>boiler</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="eff" class="inner-input" oninput="validateLive4()" placeholder="0-100%"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="eff" class="inner-input" oninput="validateLive2()" placeholder="0-100%" min="0"></div>
     <div class="grid-cell bg-blue">%</div>
 
     <div class="grid-cell bg-blue left-align">Feedwater Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">h<sub>w, in</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="h_w_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_w_in" class="inner-input" oninput="validateLive2()" placeholder="Enter value ..." min="0"></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Exhaust Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Boiler)</span></div>
     <div class="grid-cell bg-blue">h<sub>w, out</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="h_w_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_w_out" class="inner-input" oninput="validateLive2()" placeholder="Enter value ..." min="0"></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
   </div>
 
@@ -890,14 +930,15 @@ function runCombustionCalc() {
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
       <button type="button" onclick="showPage(1)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
-      <button type="button" onclick="showPage(5)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
+      <button type="button" onclick="showPage(3)" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
     </div>
   </div>
 </div>
 
 
 <script>
-function validateLive4() {
+function validateLive2() {
+    const wInput = document.getElementById('in_waste4');
     const mInput = document.getElementById('in_moisture4');
     const hhvInput = document.getElementById('in_hhv4');
     const lhvInput = document.getElementById('in_lhv4');
@@ -905,6 +946,7 @@ function validateLive4() {
     const Feedwater = document.getElementById('h_w_in');
     const Exhaust4 = document.getElementById('h_w_out');
 
+    const wVal = parseFloat(wInput.value) || 0;
     const mVal = parseFloat(mInput.value) || 0;
     const hhvVal = parseFloat(hhvInput.value) || 0;
     const lhvVal = parseFloat(lhvInput.value) || 0;
@@ -915,8 +957,35 @@ function validateLive4() {
     // เปลี่ยนสีตามเงื่อนไข
     mInput.style.color = (mVal > 100 || mVal <= 0) ? "red" : "green";
     eff.style.color = (effVal > 100 || effVal <= 0) ? "red" : "green";
-    hhvInput.style.color = (hhvVal === 0) ? "#999" : "#333";
-    lhvInput.style.color = (lhvVal === 0) ? "#999" : "#333";
+    wInput.style.color = (wVal < 1) ? "red" : "green";
+    hhvInput.style.color = (hhvVal < 0) ? "red" : "green";
+    lhvInput.style.color = (lhvVal < 0) ? "red" : "green";
+    Feedwater.style.color = (FeedwaterVal < 1) ? "red" : "green";
+    Exhaust4.style.color = (Exhaust4Val < 1) ? "red" : "green";
+}
+
+function toggleHeatInputs2() {
+    const hhvInput = document.getElementById('in_hhv4');
+    const lhvInput = document.getElementById('in_lhv4');
+
+    const hhvVal = parseFloat(hhvInput.value) || 0;
+    const lhvVal = parseFloat(lhvInput.value) || 0;
+
+    if (hhvVal > 0) {
+        lhvInput.style.backgroundColor = "#e9ecef";
+        lhvInput.disabled = true;
+    } else {
+        lhvInput.style.backgroundColor = "";
+        lhvInput.disabled = false;
+    }
+
+    if (lhvVal > 0) {
+        hhvInput.style.backgroundColor = "#e9ecef";
+        hhvInput.disabled = true;
+    } else {
+        hhvInput.style.backgroundColor = "";
+        hhvInput.disabled = false;
+    }
 }
 
 function runSteamCalc() {
@@ -941,6 +1010,11 @@ function runSteamCalc() {
     if(!eff || !Feedwater || !Exhaust4) {
         alert("Please fill in all fields.");
         return;
+    }
+    // ห้ามค่าติดลบ
+    if (waste < 0 || hhv < 0 || lhvIn < 0 || m < 0 || eff < 0 || Feedwater < 0 || Exhaust4 < 0) {
+      alert("Negative values are not allowed. Please enter values greater than or equal to 0.");
+      return;
     }
 
     // 3. จัดการค่าความร้อน (Back-end Hidden Calculation)
@@ -978,8 +1052,8 @@ function runSteamCalc() {
 
 </script>
       <!-- จบส่วนที่ 4  Steam Generation Rate -->
-      <!-- เริ่มส่วนที่ 5  Turbine And Generator -->
-<div id="page-5" class="page-section">
+      <!-- เริ่มส่วนที่ 3  Turbine And Generator -->
+<div id="page-3" class="page-section">
   <h3 class="section-title">Turbine And Generator</h3>
 
   <div class="grid-table">
@@ -992,22 +1066,22 @@ function runSteamCalc() {
 
     <div class="grid-cell bg-blue left-align">Generator Power Factor</div>
     <div class="grid-cell bg-blue">P.F.</div>
-    <div class="grid-cell bg-white-box"><input type="number" id="PF" class="inner-input" oninput="validateLive5()" placeholder="Max 1.0"></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="PF" class="inner-input" oninput="validateLive3()" placeholder="Max 1.0"></div>
     <div class="grid-cell bg-blue"></div>
 
     <div class="grid-cell bg-blue left-align">Inlet Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
     <div class="grid-cell bg-blue">h<sub>in</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="h_in" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_in" class="inner-input" oninput="validateLive3()" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Exhaust Steam Enthalpy&nbsp;&nbsp;&nbsp;<span style="color: #888;">(Turbine)</span></div>
     <div class="grid-cell bg-blue">h<sub>out</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="h_out" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="h_out" class="inner-input" oninput="validateLive3()" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">kJ/kg</div>
 
     <div class="grid-cell bg-blue left-align">Steam Flow Rate</div>
     <div class="grid-cell bg-blue">ṁ<sub>w</sub></div>
-    <div class="grid-cell bg-white-box"><input type="number" id="m_w5" class="inner-input" placeholder="Enter value ..."></div>
+    <div class="grid-cell bg-white-box"><input type="number" id="m_w5" class="inner-input" oninput="validateLive3()" placeholder="Enter value ..."></div>
     <div class="grid-cell bg-blue">ton/hr</div>
   </div>
 
@@ -1051,7 +1125,7 @@ function runSteamCalc() {
 
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
-      <button type="button" onclick="showPage(4)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
+      <button type="button" onclick="showPage(2)" style="padding: 10px 25px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 5px; font-weight: bold;">❮ Previous Page</button>
       <button type="button" onclick="showPage('sum')" style="padding: 10px 25px; cursor: pointer; background-color: #00468c; color: white; border: none; border-radius: 5px; font-weight: bold;">Next Page ❯</button>
     </div>
   </div>
@@ -1059,13 +1133,24 @@ function runSteamCalc() {
 
 
 <script>
-function validateLive5() {
+function validateLive3() {
     // ต้องอ้างอิงถึง Element ให้ถูกตัว
     const PFInput = document.getElementById('PF');
+    const hinInput = document.getElementById('h_in');
+    const houtInput = document.getElementById('h_out');
+    const mwInput = document.getElementById('m_w5');
+
     const PFVal = parseFloat(PFInput.value) || 0;
+    const hinVal = parseFloat(hinInput.value) || 0;
+    const houtVal = parseFloat(houtInput.value) || 0;
+    const mwVal = parseFloat(mwInput.value) || 0;
+  
 
     // เปลี่ยนสีตามเงื่อนไข
-    PFInput.style.color = (PFVal > 1) ? "red" : (PFVal > 0 ? "green" : "");
+    PFInput.style.color = (PFVal > 1 || PFVal < 0.001 ) ? "red" : (PFVal > 0 ? "green" : "");
+    hinInput.style.color = (hinVal < 1) ? "red" : "green";
+    houtInput.style.color = (houtVal < 1) ? "red" : "green";
+    mwInput.style.color = (mwVal < 1) ? "red" : "green";
 }
 
 function runTurbineCalc() {
@@ -1096,6 +1181,12 @@ function runTurbineCalc() {
         return;
     }
 
+    // ห้ามค่าติดลบ
+    if (PF < 0 || h_in < 0 || h_out < 0 || m_w5 < 0) {
+      alert("Negative values are not allowed. Please enter values greater than or equal to 0.");
+      return;
+    }
+
     // 3. คำนวณ (ใช้ชื่อตัวแปรให้ตรงกับที่ประกาศไว้ข้างบน)
     // สูตร: MW = (ton/hr * kJ/kg) / 3600
     const m_dot_out_t = (m_w5 * (h_in - h_out)) / 3600;
@@ -1116,7 +1207,7 @@ function runTurbineCalc() {
 }
 </script>
 </script>
-      <!-- จบส่วนที่ 5  Steam Generation Rate -->
+      <!-- จบส่วนที่ 3  Steam Generation Rate -->
       <!-- เริ่มส่วนที่ 6  Summery -->
 <div id="page-sum" class="page-section">
   <h3 class="section-title">Overall Summary</h3>
