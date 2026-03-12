@@ -504,7 +504,7 @@ function validateMoisture(id) {
     const val = parseFloat(input.value) || 0;
 
     // เช็คค่าความชื้น
-    if (val > 100 || val < 0.1) {
+    if (val > 100 || val < 0.001) {
         // ถ้าเกิน 100 บังคับเป็นสีแดง
         input.style.setProperty('color', '#dc3545', 'important');
         input.style.fontWeight = 'bold';
