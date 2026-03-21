@@ -46,6 +46,32 @@
   .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
   .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
 
+  /* ================== ส่วนที่เพิ่ม: CSS สำหรับ Side Menu (เพื่อให้เด้งออกมาเหมือนในรูป) ================== */
+  .menu-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); display: none; z-index: 999;
+  }
+  .menu-overlay.active { display: block; }
+
+  .side-menu {
+    position: fixed; top: 0; right: -400px;
+    width: 350px; height: 100%;
+    background-color: #1a2533; z-index: 1000;
+    transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    border-radius: 20px 0 0 20px; color: white; overflow-y: auto;
+  }
+  .side-menu.active { right: 0; }
+  .menu-content { padding: 40px 25px; text-align: center; }
+  .close-btn { position: absolute; top: 20px; left: 20px; font-size: 2rem; cursor: pointer; color: white; }
+  .menu-links { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+  .menu-links a {
+    display: block; padding: 14px; color: white; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; transition: 0.3s;
+    font-size: 0.95rem; text-align: left;
+  }
+  .menu-links a:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-yellow); border-color: white; }
+  /* ========================================================================================= */
+
   /* --- 2. Hero Section --- */
   .hero {
     text-align: center;
@@ -173,6 +199,24 @@ footer {
 </head>
 <body>
 
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideMenu" class="side-menu">
+      <div class="menu-content">
+          <div class="close-btn" onclick="toggleMenu()">×</div>
+          <div class="menu-header">
+              <h2>WIRC-MSW Model</h2>
+              <p>Mathematical Model for MSW in Developing Countries</p>
+          </div>
+          <nav class="menu-links">
+              <a href="index.html" onclick="toggleMenu()">Home</a>
+              <a href="HHV_test.html" onclick="toggleMenu()">HHV Calculator</a>
+              <a href="PPformularTest1.html" onclick="toggleMenu()">Power Plant Performance</a>  
+              <a href="manual.html" onclick="toggleMenu()">User Manual</a>
+              <a href="#contact-section" onclick="toggleMenu()">Contact Us</a>
+          </nav>
+      </div>
+  </div>
+
   <header>
     <div class="header-left">
       <div class="logos">
@@ -187,18 +231,40 @@ footer {
       </div>
     </div>
     <div class="header-right">
-      <a href="#" class="nav-link">User Manual</a>
-      <div class="lang-switch">TH | EN</div>
-      <div class="hamburger">☰</div>
+      <a href="manual.html" class="nav-link lang-switch">User Manual</a>
+      <div class="hamburger"onclick="toggleMenu()">☰</div>
     </div>
   </header>
 
   <section class="hero">
-    <h2>User Manual</h2>
-    <p class="subtitle">
-    คู่มือการใช้งาน โปรแกรมทำนายค่าความร้อนของขยะมูลฝอย และประเมินศักยภาพโรงไฟฟ้าพลังงานขยะชุมชนสำหรับประเทศกำลังพัฒนา
-    <br>พัฒนาโดย ศูนย์วิจัยการเผาไหม้ขยะ (WIRC) มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ
-    </p>
+
+    <div id="gallery"></div>
+
+<script>
+const totalImages = 15; // จำนวนรูป
+
+const gallery = document.getElementById("gallery");
+
+for (let i = 1; i <= totalImages; i++) {
+    const img = document.createElement("img");
+
+    // 🔥 ถ้า path มีช่องว่าง ใช้ %20
+    img.src = "image/Manual%20Final/" + i + ".png";
+
+    // คลิกเพื่อขยาย
+    img.onclick = function() {
+        document.getElementById("imgModal").style.display = "block";
+        document.getElementById("modalImg").src = this.src;
+    };
+
+    gallery.appendChild(img);
+}
+
+// ปิด modal
+function closeModal() {
+    document.getElementById("imgModal").style.display = "none";
+}
+</script>
 
   </section>
 
@@ -209,11 +275,10 @@ footer {
       <div class="f-col-info">
         <div class="footer-logo-area">
         <img src="image/PP AND MSW LOGO.png" style="height: 80px;"></div>
-        <h3>ระบบคำนวณค่าความร้อน</h3>
-        <h3 style="margin-top:0;">และประเมินศักยภาพโรงไฟฟ้าพลังงานขยะชุมชน</h3>
+        <h3>Heating Value Calculation and Municipal Solid Waste (MSW)</h3>
+        <h3 style="margin-top:0;">Power Plant Potential Assessment System</h3>
         <p>
-          แบบจำลองทางคณิตศาสตร์สำหรับทำนายค่าความร้อนและพลังงานไฟฟ้า 
-          (MSW Heating Value & Power Generation)
+          Mathematical Modeling for Predicting Calorific Value and Electrical Power Generation from MSW
         </p>
       </div>
 
@@ -223,27 +288,36 @@ footer {
           <li><a href="index.html">Home</a></li>
           <li><a href="HHV_test.html">HHV Calculator</a></li>
           <li><a href="PPformularTest1.html">Power Plant Performance</a></li>
-          <li><a href="PPformularTest1.html">Simulation and Calculation</a></li>
           <li><a href="manual.html">User Manual</a></li>
         </ul>
       </div>
 
       <div class="f-col-contact">
-        <div class="f-title">ติดต่อเรา (Contact Us)</div>
+        <div class="f-title">Contact Us</div>
         <div class="contact-detail">
           <p><strong>The Waste Incineration Research Center (WIRC)</strong></p>
           <p>Department of Mechanical and Aerospace Engineering</p>
-          <p>King Mongkut's University of Technology North Bangkok (KMUTNB)</p>
-          <p style="margin-top: 15px;">Email: contact@email.kmutnb.ac.th</p>
+          <p>King Mongkut's University of Technology North Bangkok</p>
+          <p>1518 Pibulsongkram Road, Bangsue, Bangkok 10800 </p>
+          <p style="margin-top: 15px;">Email: somrat.k@eng.kmutnb.ac.th</p>
         </div>
       </div>
 
     </div>
 
     <div class="copyright">
-      Copyright © 2024 WIRC, KMUTNB. All Rights Reserved.
+      Copyright © 2026 WIRC, KMUTNB. All Rights Reserved.
     </div>
   </footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('menuOverlay');
+      menu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+  </script>
 
 </body>
 </html>
