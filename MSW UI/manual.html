@@ -278,18 +278,16 @@ const gallery = document.getElementById("gallery");
 for (let i = 1; i <= totalImages; i++) {
     const img = document.createElement("img");
 
-    // 🔥 ถ้า path มีช่องว่าง ใช้ %20 (ควรเลี่ยงการตั้งชื่อ folder/file ที่มีช่องว่าง)
-    // img.src = "image/Manual-Final/" + i + ".png";
-    
-    // แนะนำใช้ Path สัมพัทธ์ปกติ
-    img.src = `image/Manual-Final/${i}.png`;
-    
-    // ลบส่วน img.onclick เดิมออก เพื่อไม่ให้คลิกแล้วขยายรูป
+    // แก้ตรงนี้ให้เป็น M และ F ตัวใหญ่ตามชื่อ Folder ในเครื่องคุณ
+    img.src = `image/Manual-Final/${i}.png`; 
+
+    // เพิ่มคำสั่งนี้เพื่อเช็คว่ารูปไหนโหลดไม่ขึ้น
+    img.onerror = function() {
+        console.log("Error loading: " + this.src);
+    };
 
     gallery.appendChild(img);
 }
-
-// ลบฟังก์ชัน closeModal เดิมออกได้เลย
 </script>
 
   </section>
