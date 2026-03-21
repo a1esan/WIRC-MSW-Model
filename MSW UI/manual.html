@@ -194,6 +194,36 @@ footer {
     border-top: 1px solid rgba(255,255,255,0.05);
 }
 
+/* --- 2. Hero Section --- */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 80px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
+  }
+  
+  /* ================== CSS สำหรับ Gallery แบบเรียงลงมา (แบบใหม่) ================== */
+  #gallery {
+    display: flex;
+    flex-direction: column; /* จัดเรียงแบบคอลัมน์ (แนวตั้ง) */
+    align-items: center;    /* จัดกึ่งกลางรูปภาพ */
+    gap: 0;                /* กำหนดระยะห่างระหว่างรูปเป็น 0 (หรือปรับตามชอบ) */
+    width: 100%;
+    margin-top: 30px;
+  }
+
+  #gallery img {
+    width: 100%;           /* รูปภาพกว้างเต็ม container */
+    max-width: 1000px;     /* แต่ไม่เกิน 1000px เพื่อไม่ให้ใหญ่เกินไป */
+    height: auto;          /* ให้ความสูงปรับตามสัดส่วนรูปจริง */
+    display: block;        /* เอาช่องว่างด้านล่างรูปออก */
+    margin: 0 auto;        /* จัดกึ่งกลางรูป */
+    box-sizing: border-box;
+    /* transition: 0.3s; /* หากไม่ต้องการ effect ตอน hover ก็เอาออกได้ครับ */
+  }
+  /* ============================================================================== */
+
 </style>
 
 </head>
@@ -248,22 +278,18 @@ const gallery = document.getElementById("gallery");
 for (let i = 1; i <= totalImages; i++) {
     const img = document.createElement("img");
 
-    // 🔥 ถ้า path มีช่องว่าง ใช้ %20
-    img.src = "image/Manual-Final/" + i + ".png";
-
-    // คลิกเพื่อขยาย
-    img.onclick = function() {
-        document.getElementById("imgModal").style.display = "block";
-        document.getElementById("modalImg").src = this.src;
-    };
+    // 🔥 ถ้า path มีช่องว่าง ใช้ %20 (ควรเลี่ยงการตั้งชื่อ folder/file ที่มีช่องว่าง)
+    // img.src = "image/Manual-Final/" + i + ".png";
+    
+    // แนะนำใช้ Path สัมพัทธ์ปกติ
+    img.src = `image/Manual-Final/${i}.png`;
+    
+    // ลบส่วน img.onclick เดิมออก เพื่อไม่ให้คลิกแล้วขยายรูป
 
     gallery.appendChild(img);
 }
 
-// ปิด modal
-function closeModal() {
-    document.getElementById("imgModal").style.display = "none";
-}
+// ลบฟังก์ชัน closeModal เดิมออกได้เลย
 </script>
 
   </section>
