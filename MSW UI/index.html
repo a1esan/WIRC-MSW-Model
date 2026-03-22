@@ -194,6 +194,19 @@ footer {
     border-top: 1px solid rgba(255,255,255,0.05);
 }
 
+/* Responsive การย่อหน้าจอ */
+  @media (max-width: 992px) {
+    .input-grid { grid-template-columns: 1fr 1fr; } /* จอกลางเหลือ 2 คอลัมน์ */
+    .btn-calculate { grid-column: span 2; }
+  }
+
+  @media (max-width: 600px) {
+    .input-grid { grid-template-columns: 1fr; } /* จอมือถือเหลือ 1 คอลัมน์ */
+    .btn-calculate { grid-column: span 1; }
+    .footer-content { flex-direction: column; gap: 40px; }
+    .f-col-menu, .f-col-contact { border-left: none; padding-left: 0; }
+  }
+
 </style>
 
 </head>
