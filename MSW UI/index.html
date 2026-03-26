@@ -49,24 +49,6 @@
   .lang-switch { border: 1px solid var(--primary-blue); border-radius: 20px; padding: 4px 15px; color: var(--primary-blue); font-size: 0.9rem; cursor: pointer; }
   .hamburger { font-size: 1.5rem; color: var(--primary-blue); cursor: pointer; }
 
-  /* สำหรับหน้าจอมือถือที่มีขนาดน้อยกว่า 768px */
-@media (max-width: 768px) {
-  .header-container { /* เปลี่ยนชื่อ class ให้ตรงกับที่คุณใช้ */
-    display: flex;
-    flex-direction: column; /* สั่งให้โลโก้กับตัวหนังสือเรียงกันเป็นแนวตั้ง */
-    align-items: center;    /* จัดให้อยู่กึ่งกลาง */
-    text-align: center;
-  }
-
-  .site-title-container { /* ส่วนของตัวหนังสือ */
-    margin-top: 20px;       /* ขยับลงมาจากโลโก้ 20px หรือตามความเหมาะสม */
-  }
-  
-  .logo-group {
-    margin-bottom: 10px;    /* เว้นระยะล่างโลโก้ */
-  }
-}
-
   /* ================== ส่วนที่เพิ่ม: CSS สำหรับ Side Menu (เพื่อให้เด้งออกมาเหมือนในรูป) ================== */
   .menu-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -227,6 +209,32 @@ footer {
     .footer-content { flex-direction: column; gap: 40px; }
     .f-col-menu, .f-col-contact { border-left: none; padding-left: 0; }
   }
+
+  /* --- เพิ่มส่วนนี้เข้าไปท้ายสุดของ CSS --- */
+@media (max-width: 600px) {
+  /* 1. ปรับให้ Header เรียงกันเป็นแนวตั้ง */
+  .header-left {
+    flex-direction: column; 
+    align-items: center;    /* จัดให้อยู่กึ่งกลาง */
+    gap: 10px;              /* ระยะห่างระหว่างโลโก้กับตัวหนังสือ */
+  }
+
+  /* 2. เอาเส้นคั่นทางซ้ายออก และจัดตัวหนังสือให้อยู่กลาง */
+  .brand-text {
+    border-left: none;      /* เอาเส้นแนวตั้งออก  */
+    padding-left: 0;        /* เอา padding ออก  */
+    text-align: center;     /* จัดตัวหนังสือให้อยู่กึ่งกลาง */
+  }
+
+  /* 3. ปรับขนาดตัวหนังสือให้พอดีกับมือถือ */
+  .brand-text h1 {
+    font-size: 1.1rem;      /* ลดขนาดหัวข้อลงเล็กน้อย [cite: 60] */
+  }
+  
+  .brand-text p {
+    font-size: 0.75rem;     /* ลดขนาดคำอธิบายลงเล็กน้อย [cite: 60] */
+  }
+}
 
 </style>
 
