@@ -410,6 +410,32 @@
     .footer-content { flex-direction: column; gap: 40px; }
     .f-col-menu, .f-col-contact { border-left: none; padding-left: 0; }
   }
+
+  /* --- เพิ่มส่วนนี้เข้าไปท้ายสุดของ CSS --- */
+@media (max-width: 600px) {
+  /* 1. ปรับให้ Header เรียงกันเป็นแนวตั้ง */
+  .header-left {
+    flex-direction: column; 
+    align-items: center;    /* จัดให้อยู่กึ่งกลาง */
+    gap: 10px;              /* ระยะห่างระหว่างโลโก้กับตัวหนังสือ */
+  }
+
+  /* 2. เอาเส้นคั่นทางซ้ายออก และจัดตัวหนังสือให้อยู่กลาง */
+  .brand-text {
+    border-left: none;      /* เอาเส้นแนวตั้งออก  */
+    padding-left: 0;        /* เอา padding ออก  */
+    text-align: center;     /* จัดตัวหนังสือให้อยู่กึ่งกลาง */
+  }
+
+  /* 3. ปรับขนาดตัวหนังสือให้พอดีกับมือถือ */
+  .brand-text h1 {
+    font-size: 1.1rem;      /* ลดขนาดหัวข้อลงเล็กน้อย [cite: 60] */
+  }
+  
+  .brand-text p {
+    font-size: 0.75rem;     /* ลดขนาดคำอธิบายลงเล็กน้อย [cite: 60] */
+  }
+}
 </style>
 <!-- จบ CSS -->
 </head>
