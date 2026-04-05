@@ -39,6 +39,15 @@ def predict():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+    @app.route('/')
+def home():
+    return "AI HHV Model is Running! Please go to /HHV_test.html"
+
+@app.route('/<path:path>')
+def send_report(path):
+    from flask import send_from_directory
+    return send_from_directory('.', path)
+
     # ต้องอยู่ล่างสุดของไฟล์ app10.py และห้ามเคาะเว้นวรรคข้างหน้า (ต้องชิดซ้าย)
 if __name__ == '__main__':
     # host='0.0.0.0' เพื่อให้เครื่องอื่นในวงแลนมองเห็น
