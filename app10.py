@@ -1,54 +1,52 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+import os
 from predict_model import predict_hhv 
 
 app = Flask(__name__)
 CORS(app)
 
-print("--- ระบบคำนวณ HHV พร้อมใช้งาน (ไม่ต้องใช้ MATLAB Engine) ---")
+# ระบุชื่อโฟลเดอร์ที่เก็บไฟล์ทั้งหมด
+BASE_DIR = 'MSW UI'
 
+# 1. หน้าแรกสุด: ใครเข้าลิงก์หลัก ให้ไปเปิด index.html ในโฟลเดอร์ MSW UI
+@app.route('/')
+def index():
+    return send_from_directory(BASE_DIR, 'index.html')
+
+# 2. ทางลัดดึงไฟล์อื่นๆ: ใครพิมพ์ชื่อไฟล์อะไรมา (เช่น /HHV_test.html) ให้ไปหยิบจาก MSW UI มาให้
+@app.route('/<path:path>')
+def send_static(path):
+    return send_from_directory(BASE_DIR, path)
+
+# 3. ระบบคำนวณ (เหมือนเดิม)
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         data = request.json
-        # 1. รับค่า % และคูณตัวเลขน้ำหนัก (อ้างอิงตามสเกลที่ใช้เทรน Mu/Sigma)
         fw = (float(data.get('fw', 0)) / 100) * 16603.48
         pa = (float(data.get('pa', 0)) / 100) * 15821.31
         pf = (float(data.get('pf', 0)) / 100) * 32763.28
         t  = (float(data.get('t', 0)) / 100)  * 21733.86
         w  = (float(data.get('w', 0)) / 100)  * 16920.80
         lr = (float(data.get('lr', 0)) / 100) * 29259.83
-        m  = float(data.get('m', 0)) # ค่าความชื้น %
+        m  = float(data.get('m', 0))
         
-        # 2. ส่ง 7 ตัวแปรเข้า ANN (ตัวที่ 7 คือ m)
         input_for_ann = [fw, pa, pf, t, w, lr, m] 
         hhv_result = predict_hhv(input_for_ann)
 
         if isinstance(hhv_result, str):
             return jsonify({'success': False, 'error': hhv_result})
 
-        # --- ไม่ต้องคำนวณ hhv_as แยกแล้ว ยึดตามโปรแกรมพ่นออกมาเลย ---
-        print(f"✅ AI Result: {hhv_result:.2f} (Moisture included as input)")
-
         return jsonify({
             'success': True, 
-            'hhv': hhv_result,      # ค่าที่ได้จาก AI ตรงๆ
-            'hhv_dry': hhv_result,  # โชว์เหมือนกันไปก่อนเพื่อเช็กค่า
+            'hhv': hhv_result,
             'm_used': m
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-    @app.route('/')
-def home():
-    return "AI HHV Model is Running! Please go to /HHV_test.html"
-
-@app.route('/<path:path>')
-def send_report(path):
-    from flask import send_from_directory
-    return send_from_directory('.', path)
-
-    # ต้องอยู่ล่างสุดของไฟล์ app10.py และห้ามเคาะเว้นวรรคข้างหน้า (ต้องชิดซ้าย)
 if __name__ == '__main__':
-    # host='0.0.0.0' เพื่อให้เครื่องอื่นในวงแลนมองเห็น
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # Render จะใช้ Port จากระบบ ถ้าหาไม่เจอจะใช้ 5000
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
